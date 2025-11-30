@@ -1,0 +1,85 @@
+// N-Queens Solver
+function solveNQueens(n) {
+  if (n < 1) return [];
+  const solutions = [];
+
+  function isSafe(row, col, cols, diag1, diag2) {
+    return !cols.has(col) && !diag1.has(row + col) && !diag2.has(row - col);
+  }
+
+  function backtrack(row, current, cols, diag1, diag2) {
+    if (row === n) {
+      solutions.push([...current]);
+      return;
+    }
+    for (let col = 0; col < n; col++) {
+      if (isSafe(row, col, cols, diag1, diag2)) {
+        current.push(col);
+        cols.add(col);
+        diag1.add(row + col);
+        diag2.add(row - col);
+
+        backtrack(row + 1, current, cols, diag1, diag2);
+
+        current.pop();
+        cols.delete(col);
+        diag1.delete(row + col);
+        diag2.delete(row - col);
+      }
+    }
+  }
+
+  backtrack(0, [], new Set(), new Set(), new Set());
+  return solutions;
+}
+
+// DOM Elements
+const nInput = document.getElementById('nInput');
+const solveBtn = document.getElementById('solveBtn');
+const solutionsCountDiv = document.getElementById('solutionsCount');
+const boardContainer = document.getElementById('board-container');
+
+// Render solutions
+function renderSolutions(n) {
+  boardContainer.innerHTML = '';
+  solutionsCountDiv.textContent = '';
+
+  const solutions = solveNQueens(n);
+  solutionsCountDiv.textContent = `${solutions.length} solutions found`;
+
+  solutions.forEach(solution => {
+    const board = document.createElement('div');
+    board.className = 'board';
+    board.style.setProperty('--n', n);
+
+    for (let row = 0; row < n; row++) {
+      for (let col = 0; col < n; col++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+
+        if (solution[row] === col) {
+          const queen = document.createElement('div');
+          queen.className = 'queen';
+          cell.appendChild(queen);
+        }
+
+        board.appendChild(cell);
+      }
+    }
+
+    boardContainer.appendChild(board);
+  });
+}
+
+// Solve button
+solveBtn.addEventListener('click', () => {
+  const n = parseInt(nInput.value);
+  if (isNaN(n) || n < 1 || n > 15) {
+    alert('Please enter a number between 1 and 15.');
+    return;
+  }
+  renderSolutions(n);
+});
+
+// Initial render
+renderSolutions(parseInt(nInput.value));
